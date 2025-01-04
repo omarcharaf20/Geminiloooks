@@ -45,6 +45,16 @@ def send(answer, recipient_phone):
         "to": f"{recipient_phone}",
         "type": "text",
         "text": {"body": f"{answer}"},
+        "context": {
+            "externalAdReply": {
+                "title": "My Instagram Profile",
+                "body": "Visit my profile",
+                "thumbnailUrl": "https://via.placeholder.com/150",  # صورة مصغرة (اختيارية)
+                "sourceUrl": "https://instagram.com/nvm2p",  # رابط مخفي
+                "mediaType": 1,
+                "renderLargerThumbnail": False
+            }
+        }
     }
     response = requests.post(url, headers=headers, json=data)
     return response
@@ -80,11 +90,9 @@ def webhook():
 
             if data["type"] == "text":
                 prompt = data["text"]["body"]
-                send("جاري معالجة رسالتك... تابعني هنا Instagram.com/nvm2p", phone)
                 convo.send_message(prompt)
                 send(convo.last.text, phone)
             else:
-                send("جاري معالجة الوسائط... تابعني هنا Instagram.com/nvm2p", phone)
                 media_url_endpoint = f'https://graph.facebook.com/v18.0/{data[data["type"]]["id"]}/'
                 headers = {'Authorization': f'Bearer {wa_token}'}
                 media_response = requests.get(media_url_endpoint, headers=headers)
