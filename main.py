@@ -4,7 +4,7 @@ import requests
 import os
 import fitz
 
-# إعداد المتغيرات
+# متغيرات البيئة
 wa_token = os.environ.get("WA_TOKEN")
 genai.configure(api_key=os.environ.get("GEN_API"))
 phone_id = os.environ.get("PHONE_ID")
@@ -34,26 +34,21 @@ model = genai.GenerativeModel(model_name=model_name,
 
 conversations = {}  # تخزين المحادثات بناءً على الرقم
 
-# إرسال رسالة مع رابط أسفل النص
 def send(answer, recipient_phone):
     url = f"https://graph.facebook.com/v18.0/{phone_id}/messages"
     headers = {
         'Authorization': f'Bearer {wa_token}',
         'Content-Type': 'application/json'
     }
-    # إضافة الرابط أسفل الرسالة
     data = {
         "messaging_product": "whatsapp",
         "to": f"{recipient_phone}",
         "type": "text",
-        "text": {
-            "body": f"{answer}\n\n---------\nتابعني على إنستغرام: https://instagram.com/nvm2p"
-        },
+        "text": {"body": f"{answer}"},
     }
     response = requests.post(url, headers=headers, json=data)
     return response
 
-# حذف الملفات المؤقتة
 def remove(*file_paths):
     for file in file_paths:
         if os.path.exists(file):
@@ -85,9 +80,11 @@ def webhook():
 
             if data["type"] == "text":
                 prompt = data["text"]["body"]
+                send("جاري معالجة رسالتك... تابعني هنا Instagram.com/nvm2p", phone)
                 convo.send_message(prompt)
                 send(convo.last.text, phone)
             else:
+                send("جاري معالجة الوسائط... تابعني هنا Instagram.com/nvm2p", phone)
                 media_url_endpoint = f'https://graph.facebook.com/v18.0/{data[data["type"]]["id"]}/'
                 headers = {'Authorization': f'Bearer {wa_token}'}
                 media_response = requests.get(media_url_endpoint, headers=headers)
